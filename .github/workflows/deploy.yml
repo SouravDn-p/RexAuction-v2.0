@@ -3,7 +3,7 @@ name: Deploy RexAuction Frontend
 on:
   push:
     branches:
-      - rex-2.0
+      - main
 
 jobs:
   deploy:
