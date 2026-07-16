@@ -1,0 +1,10 @@
+services:
+  frontend:
+    image: softvence/rexauction-frontend:latest
+    container_name: rexauction-frontend
+
+    restart: unless-stopped
+
+
+    ports:
+      - "8246:80"

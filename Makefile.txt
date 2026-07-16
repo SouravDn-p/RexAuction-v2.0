@@ -1,0 +1,35 @@
+IMAGE=softvence/rexauction-frontend:latest
+CONTAINER=rexauction-frontend
+
+ps:
+	docker ps
+
+cms:
+	docker compose ps
+
+build:
+	docker build -t $(IMAGE) .
+
+push:
+	docker push $(IMAGE)
+
+pull:
+	docker pull $(IMAGE)
+
+up:
+	docker compose up -d
+
+down:
+	docker compose down
+
+restart:
+	docker compose down
+	docker compose up -d
+
+logs:
+	docker logs -f $(CONTAINER)
+
+clean:
+	docker system prune -af
+
+all: build push
