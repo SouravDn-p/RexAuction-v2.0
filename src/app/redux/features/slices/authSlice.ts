@@ -171,6 +171,21 @@ export const mockPasswordReset = async (email: string): Promise<void> => {
   console.log(`Password reset email sent to: ${email}`);
 };
 
+/** Prototype email OTP — always this code until a real mailer is wired. */
+export const MOCK_EMAIL_OTP = "123456";
+
+export const mockSendEmailOtp = async (email: string): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  console.log(`Mock OTP for ${email}: ${MOCK_EMAIL_OTP}`);
+};
+
+export const mockVerifyEmailOtp = async (code: string): Promise<void> => {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  if (code.trim() !== MOCK_EMAIL_OTP) {
+    throw new Error("Invalid or expired verification code");
+  }
+};
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 export const { setLoading, setUser, logout, setErrorMessage, clearError } = authSlice.actions;
 export default authSlice.reducer;

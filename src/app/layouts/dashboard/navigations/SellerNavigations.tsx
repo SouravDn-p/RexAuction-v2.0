@@ -51,7 +51,7 @@ const SellerNavigations = ({
 
   // Shared NavLink class builder
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 py-2 px-2.5 rounded-lg text-sm transition-all duration-150 mb-0.5
+    `flex items-center gap-3 py-2 px-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150 mb-0.5
     ${isActive ? navActive : `${textClass} ${navHover}`}
     ${collapsed ? "justify-center" : ""}`;
 
@@ -61,7 +61,7 @@ const SellerNavigations = ({
       onClick={() => toggleDropdown(key)}
       title={collapsed ? label : undefined}
       className={`
-        flex items-center w-full py-2 px-2.5 rounded-lg text-sm transition-all duration-150 mb-0.5
+        flex items-center w-full py-2 px-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150 mb-0.5
         ${textClass} ${navHover}
         ${collapsed ? "justify-center" : "justify-between"}
       `}
