@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { useTheme } from "../../../../hooks/useTheme";
 
 // ─── Company logos ────────────────────────────────────────────────────────────
@@ -203,10 +204,20 @@ const ContactUsPage = () => {
                 />
                 <span>
                   I accept the{" "}
-                  <span className="text-purple-400 underline underline-offset-2 cursor-pointer">
-                    Terms & Conditions
-                  </span>{" "}
-                  and acknowledge the Rex Auction Privacy Policy.
+                  <Link
+                    to="/terms-of-service"
+                    className="text-purple-400 underline underline-offset-2"
+                  >
+                    Terms of Service
+                  </Link>{" "}
+                  and acknowledge the Rex Auction{" "}
+                  <Link
+                    to="/privacy-policy"
+                    className="text-purple-400 underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
                 </span>
               </label>
 

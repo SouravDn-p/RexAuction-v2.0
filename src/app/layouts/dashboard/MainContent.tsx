@@ -46,6 +46,11 @@ const MainContent = ({ onMobileMenuOpen }: MainContentProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const chatPath = location.pathname.includes("chat");
+  const dashRole =
+    location.pathname.startsWith("/admin") ? "admin" :
+    location.pathname.startsWith("/seller") ? "seller" :
+    location.pathname.startsWith("/buyer") ? "buyer" :
+    MOCK_USER.role;
 
   const notificationCount = notifications.filter((n) => !n.read).length;
 
@@ -73,7 +78,7 @@ const MainContent = ({ onMobileMenuOpen }: MainContentProps) => {
       prev.map((n) => (n._id === notification._id ? { ...n, read: true } : n))
     );
     setIsNotificationsOpen(false);
-    navigate(`/${MOCK_USER.role}/announcement`, { state: { notificationDetails: notification } });
+    navigate(`/${dashRole}/announcement`, { state: { notificationDetails: notification } });
   };
 
   const handleLogout = () => {
@@ -84,13 +89,13 @@ const MainContent = ({ onMobileMenuOpen }: MainContentProps) => {
   const getPageInfo = () => {
     const path = location.pathname;
     const map: Record<string, { name: string; sub: string }> = {  
-      [`${MOCK_USER.role}`]: { name: "Dashboard", sub: "Overview & analytics" },
-      [`${MOCK_USER.role}/announcement`]: { name: "Announcements", sub: "Platform updates" },
-      [`${MOCK_USER.role}/profile`]: { name: "Profile", sub: "Manage your account" },
-      [`${MOCK_USER.role}/settings`]: { name: "Settings", sub: "App preferences" },
-      [`${MOCK_USER.role}/blog`]: { name: "Blog", sub: "Manage blog posts" },
-      [`${MOCK_USER.role}/userManagement`]: { name: "Users", sub: "Manage platform users" },
-      [`${MOCK_USER.role}/manageAuctions`]: { name: "Auctions", sub: "Manage all auctions" },
+      [`/${dashRole}`]: { name: "Dashboard", sub: "Overview & analytics" },
+      [`/${dashRole}/announcement`]: { name: "Announcements", sub: "Platform updates" },
+      [`/${dashRole}/profile`]: { name: "Profile", sub: "Manage your account" },
+      [`/${dashRole}/settings`]: { name: "Settings", sub: "App preferences" },
+      [`/${dashRole}/blog`]: { name: "Blog", sub: "Manage blog posts" },
+      [`/${dashRole}/userManagement`]: { name: "Users", sub: "Manage platform users" },
+      [`/${dashRole}/manageAuctions`]: { name: "Auctions", sub: "Manage all auctions" },
     };
     return map[path] ?? { name: "Dashboard", sub: "Welcome back" };
   };
@@ -273,7 +278,7 @@ const MainContent = ({ onMobileMenuOpen }: MainContentProps) => {
                   )}
                   <div className="hidden sm:block text-left">
                     <p className={`text-xs font-semibold leading-tight ${isDarkMode ? "text-white" : "text-gray-800"}`}>{MOCK_USER.name.split(" ")[0]}</p>
-                    <p className={`text-[10px] leading-tight capitalize ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{MOCK_USER.role}</p>
+                    <p className={`text-[10px] leading-tight capitalize ${isDarkMode ? "text-gray-500" : "text-gray-400"}`}>{dashRole}</p>
                   </div>
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isProfileOpen ? "rotate-180" : ""} ${isDarkMode ? "text-gray-500" : "text-gray-400"}`} />
                 </button>
@@ -286,9 +291,9 @@ const MainContent = ({ onMobileMenuOpen }: MainContentProps) => {
                     </div>
                     <div className="py-1.5 px-1.5 space-y-0.5">
                       {[
-                        { to: `/${MOCK_USER.role}/settings/profile`, icon: <User className="w-3.5 h-3.5" />, label: "Profile" },
-                        { to: `/${MOCK_USER.role}/walletHistory`, icon: <Wallet className="w-3.5 h-3.5" />, label: "Wallet History" },
-                        { to: `/${MOCK_USER.role}/settings`, icon: <Settings className="w-3.5 h-3.5" />, label: "Settings" },
+                        { to: `/${dashRole}/settings/profile`, icon: <User className="w-3.5 h-3.5" />, label: "Profile" },
+                        { to: `/${dashRole}/walletHistory`, icon: <Wallet className="w-3.5 h-3.5" />, label: "Wallet History" },
+                        { to: `/${dashRole}/settings`, icon: <Settings className="w-3.5 h-3.5" />, label: "Settings" },
                       ].map(({ to, icon, label }) => (
                         <Link
                           key={to}
