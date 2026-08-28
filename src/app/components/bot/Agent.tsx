@@ -1,24 +1,37 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageSquare, Send, X, ChevronDown, Loader2, Bot, User } from "lucide-react";
-import rexLogo from "@/assets/logo.png";
+import {
+  Bot,
+  ChevronDown,
+  Gavel,
+  Loader2,
+  MessageSquare,
+  Send,
+  Sparkles,
+  User,
+  X,
+} from "lucide-react";
 import { useTheme } from "../../../hooks/useTheme";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface ChatMessage {
   role: "user" | "model";
   text: string;
   isError?: boolean;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+const SUGGESTIONS = [
+  "How do I place a bid?",
+  "How do I become a seller?",
+  "Where can I see won auctions?",
+  "How do payments work?",
+];
 
-const TypingDots = () => (
-  <span className="inline-flex items-center gap-1">
-    <span className="text-sm mr-1">Thinking</span>
+const TypingDots = ({ isDarkMode }: { isDarkMode: boolean }) => (
+  <span className={`inline-flex items-center gap-1.5 text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+    <span>Writing</span>
     {[0, 1, 2].map((i) => (
       <span
         key={i}
-        className="w-1.5 h-1.5 rounded-full bg-white/80 animate-bounce"
+        className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-slate-400" : "bg-slate-400"} animate-bounce`}
         style={{ animationDelay: `${i * 0.15}s`, animationDuration: "0.8s" }}
       />
     ))}
@@ -32,6 +45,10 @@ const Agent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const chatBodyRef = useRef<HTMLDivElement>(null);
   const { isDarkMode } = useTheme();
+
+  const panel = isDarkMode ? "bg-[#161820] border-[#252733]" : "bg-white border-gray-200";
+  const muted = isDarkMode ? "text-gray-500" : "text-gray-500";
+  const bodyBg = isDarkMode ? "bg-[#0E0F14]" : "bg-slate-50";
 
   const generateResponse = async (history: ChatMessage[]) => {
     setIsLoading(true);
@@ -59,7 +76,7 @@ const Agent = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error?.message || "Something went wrong");
+        throw new Error(data?.error?.message || "The assistant is unavailable right now.");
       }
 
       const apiResponseText = data.candidates[0].content.parts[0].text
@@ -69,23 +86,26 @@ const Agent = () => {
       updateHistory(apiResponseText);
     } catch (error) {
       updateHistory(
-        error instanceof Error ? error.message : "Something went wrong",
+        error instanceof Error ? error.message : "The assistant is unavailable right now.",
         true
       );
-      setIsLoading(false);
     }
+  };
+
+  const sendMessage = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isLoading) return;
+
+    const newMessage: ChatMessage = { role: "user", text: trimmed };
+    const updated = [...chatHistory, newMessage];
+    setChatHistory([...updated, { role: "model", text: "Thinking..." }]);
+    setInputMessage("");
+    generateResponse(updated);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim() || isLoading) return;
-
-    const newMessage: ChatMessage = { role: "user", text: inputMessage };
-    const updated = [...chatHistory, newMessage];
-
-    setChatHistory([...updated, { role: "model", text: "Thinking..." }]);
-    setInputMessage("");
-    generateResponse(updated);
+    sendMessage(inputMessage);
   };
 
   useEffect(() => {
@@ -98,109 +118,100 @@ const Agent = () => {
   }, [chatHistory]);
 
   return (
-    <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end`}>
-      {/* Chatbot Panel */}
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       <div
-        className={`mb-3 w-80 sm:w-96 flex flex-col rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 origin-bottom-right ${
-          showChatbot
-            ? "opacity-100 scale-100 pointer-events-auto"
-            : "opacity-0 scale-95 pointer-events-none h-0"
-        } ${isDarkMode ? "bg-gray-900" : "bg-white"}`}
-        style={{ height: showChatbot ? "500px" : "0px" }}
+        className={`w-[min(100vw-2rem,380px)] flex flex-col rounded-2xl border overflow-hidden origin-bottom-right transition-all duration-200 ${panel} ${
+          showChatbot ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-2 pointer-events-none h-0 border-0"
+        }`}
+        style={{ height: showChatbot ? 540 : 0 }}
+        aria-hidden={!showChatbot}
       >
-        {/* Header */}
-        <div className="bg-purple-600 text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
+        <div className={`flex items-center justify-between px-4 py-3 border-b ${isDarkMode ? "border-[#252733]" : "border-gray-200"}`}>
           <div className="flex items-center gap-3">
-            {/* Animated bot avatar */}
-            <div className="relative w-9 h-9 flex-shrink-0">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                <img
-                  src={rexLogo}
-                  alt="AI"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              </div>
-              {/* Online dot */}
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-purple-600 rounded-full" />
+            <div className="relative w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center">
+              <Gavel className="w-4 h-4 text-white" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#161820]" />
             </div>
             <div>
-              <h2 className="text-sm font-bold leading-tight">AI Assistant</h2>
-              <p className="text-xs text-purple-200">Always here to help</p>
+              <p className="text-sm font-semibold leading-tight">Rex Support</p>
+              <p className={`text-[11px] ${muted}`}>Auction help · typically replies instantly</p>
             </div>
           </div>
           <button
             onClick={() => setShowChatbot(false)}
-            className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-            aria-label="Minimize chatbot"
+            className={`p-1.5 rounded-lg ${isDarkMode ? "hover:bg-white/5" : "hover:bg-slate-100"}`}
+            aria-label="Minimize assistant"
           >
-            <ChevronDown size={18} />
+            <ChevronDown size={16} className={muted} />
           </button>
         </div>
 
-        {/* Body */}
-        <div
-          ref={chatBodyRef}
-          className={`flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth ${
-            isDarkMode ? "bg-gray-800" : "bg-gray-50"
-          }`}
-        >
-          {/* Welcome message */}
-          <div className="flex items-end gap-2">
-            <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              <img
-                src={rexLogo}
-                alt="AI"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement;
-                  el.style.display = "none";
-                  el.parentElement!.innerHTML = `<svg xmlns='http://www.w3.org/2000/svg' class='w-4 h-4 text-white' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15M14.25 3.104c.251.023.501.05.75.082M19.8 15l-3.75 3.75m0 0H8.25m7.8 0a2.25 2.25 0 01-2.25 2.25H10.5a2.25 2.25 0 01-2.25-2.25m7.8 0H8.25' /></svg>`;
-                }}
-              />
+        <div ref={chatBodyRef} className={`flex-1 overflow-y-auto p-4 space-y-4 ${bodyBg}`}>
+          <div className="flex items-start gap-2">
+            <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
-            <div className="max-w-[75%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-purple-600 text-white text-sm leading-relaxed shadow-md">
-              Hello! 👋
-              <br />
-              I'm your AI assistant. How can I help you today?
+            <div
+              className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-tl-md text-sm leading-relaxed ${
+                isDarkMode ? "bg-[#161820] border border-[#252733] text-slate-200" : "bg-white border border-gray-200 text-slate-700"
+              }`}
+            >
+              Hello — I’m the RexAuction assistant. Ask about bidding, selling, payments, or account setup.
             </div>
           </div>
 
-          {/* Chat history */}
+          {chatHistory.length === 0 && (
+            <div className="grid grid-cols-1 gap-2 pl-9">
+              {SUGGESTIONS.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => sendMessage(prompt)}
+                  className={`text-left text-xs px-3 py-2 rounded-xl border transition-colors ${
+                    isDarkMode
+                      ? "border-[#252733] bg-[#161820] text-slate-300 hover:border-violet-500/40"
+                      : "border-gray-200 bg-white text-slate-600 hover:border-violet-300"
+                  }`}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          )}
+
           {chatHistory.map((chat, index) => (
             <div
-              key={index}
-              className={`flex items-end gap-2 ${
-                chat.role === "user" ? "flex-row-reverse" : "flex-row"
-              }`}
+              key={`${chat.role}-${index}`}
+              className={`flex items-end gap-2 ${chat.role === "user" ? "flex-row-reverse" : "flex-row"}`}
             >
-              {/* Avatar */}
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden ${
-                  chat.role === "user" ? "bg-purple-400" : "bg-purple-600"
+                className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  chat.role === "user"
+                    ? isDarkMode
+                      ? "bg-slate-700"
+                      : "bg-slate-200"
+                    : "bg-violet-600"
                 }`}
               >
                 {chat.role === "user" ? (
-                  <User size={16} className="text-white" />
+                  <User size={14} className={isDarkMode ? "text-slate-200" : "text-slate-700"} />
                 ) : (
-                  <Bot size={16} className="text-white" />
+                  <Bot size={14} className="text-white" />
                 )}
               </div>
-
-              {/* Bubble */}
               <div
-                className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-md ${
+                className={`max-w-[78%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   chat.role === "user"
-                    ? "bg-purple-500 text-white rounded-br-sm"
+                    ? "bg-violet-600 text-white rounded-br-md"
                     : chat.isError
-                    ? "bg-red-500 text-white rounded-bl-sm"
-                    : "bg-purple-600 text-white rounded-bl-sm"
+                      ? "bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-bl-md"
+                      : isDarkMode
+                        ? "bg-[#161820] border border-[#252733] text-slate-200 rounded-bl-md"
+                        : "bg-white border border-gray-200 text-slate-700 rounded-bl-md"
                 }`}
               >
                 {chat.text === "Thinking..." ? (
-                  <TypingDots />
+                  <TypingDots isDarkMode={isDarkMode} />
                 ) : (
                   <span className="whitespace-pre-wrap">{chat.text}</span>
                 )}
@@ -209,60 +220,46 @@ const Agent = () => {
           ))}
         </div>
 
-        {/* Footer */}
         <form
           onSubmit={handleSubmit}
-          className={`flex-shrink-0 px-3 py-3 border-t flex gap-2 ${
-            isDarkMode
-              ? "bg-gray-900 border-gray-700"
-              : "bg-white border-gray-200"
-          }`}
+          className={`flex-shrink-0 px-3 py-3 border-t flex gap-2 ${isDarkMode ? "border-[#252733] bg-[#161820]" : "border-gray-200 bg-white"}`}
         >
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Ask about auctions…"
             disabled={isLoading}
-            className={`flex-1 text-sm px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors disabled:opacity-50 ${
+            className={`flex-1 text-sm px-3.5 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 disabled:opacity-50 ${
               isDarkMode
-                ? "bg-gray-800 text-white placeholder-gray-400 border-gray-600"
-                : "bg-gray-100 text-gray-900 placeholder-gray-500 border-gray-300"
+                ? "bg-[#0E0F14] text-white placeholder-gray-500 border-[#252733]"
+                : "bg-slate-50 text-gray-900 placeholder-gray-400 border-gray-200"
             }`}
           />
           <button
             type="submit"
             disabled={!inputMessage.trim() || isLoading}
-            className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-purple-600 hover:bg-purple-700 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-violet-600 hover:bg-violet-700 text-white disabled:opacity-40"
+            aria-label="Send message"
           >
-            {isLoading ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Send size={18} />
-            )}
+            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
           </button>
         </form>
       </div>
 
-      {/* Toggle Button */}
       <button
         onClick={() => setShowChatbot((prev) => !prev)}
-        className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
+        className={`h-12 pl-3.5 pr-4 rounded-full flex items-center gap-2 border text-sm font-semibold transition-colors ${
           showChatbot
-            ? "bg-red-500 hover:bg-red-600 rotate-0"
-            : "bg-purple-600 hover:bg-purple-700"
-        } text-white`}
-        aria-label={showChatbot ? "Close chatbot" : "Open chatbot"}
+            ? isDarkMode
+              ? "bg-[#161820] border-[#252733] text-slate-200"
+              : "bg-white border-gray-200 text-slate-800"
+            : "bg-violet-600 border-violet-600 text-white hover:bg-violet-700"
+        }`}
+        aria-label={showChatbot ? "Close assistant" : "Open assistant"}
       >
-        {showChatbot ? (
-          <X size={22} />
-        ) : (
-          <>
-            <MessageSquare size={22} />
-            {/* Pulse ring when closed */}
-            <span className="absolute w-14 h-14 rounded-full bg-purple-400 animate-ping opacity-30 pointer-events-none" />
-          </>
-        )}
+        {showChatbot ? <X size={16} /> : <MessageSquare size={16} />}
+        {showChatbot ? "Close" : "Help"}
       </button>
     </div>
   );

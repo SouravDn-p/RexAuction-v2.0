@@ -248,7 +248,7 @@ const SectionLabel = ({ label, isDarkMode }: { label: string; isDarkMode: boolea
   <div
     className={`col-span-full px-5 py-2 text-[10px] font-semibold tracking-widest uppercase border-b ${
       isDarkMode
-        ? "bg-gray-900 text-gray-500 border-gray-700"
+        ? "bg-[#0E0F14] text-gray-500 border-[#252733]"
         : "bg-slate-50 text-gray-400 border-gray-200"
     }`}
   >
@@ -259,45 +259,38 @@ const SectionLabel = ({ label, isDarkMode }: { label: string; isDarkMode: boolea
 const OurTeam = () => {
   const { isDarkMode } = useTheme();
 
-  const borderColor = isDarkMode
-    ? "border-gray-700"
-    : "border-gray-200";
+  const borderColor = isDarkMode ? "border-[#252733]" : "border-gray-200";
+  const surface = isDarkMode ? "bg-[#161820]" : "bg-white";
+  const pageBg = isDarkMode ? "bg-[#0E0F14]" : "bg-slate-50";
 
   return (
-    <div
-      className={`py-12 px-4 ${
-        isDarkMode ? "bg-gray-900" : "bg-gray-50"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-10">
-          <h2
-            className={`text-3xl font-semibold tracking-tight mb-2 ${
-              isDarkMode ? "text-white" : "text-gray-900"
+    <div className={`py-4 px-4 ${pageBg}`}>
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <p
+            className={`text-xs font-semibold uppercase tracking-widest mb-2 ${
+              isDarkMode ? "text-gray-500" : "text-gray-400"
             }`}
-            style={{ fontFamily: "'DM Serif Display', Georgia, serif" }}
+          >
+            The people
+          </p>
+          <h2
+            className={`text-2xl sm:text-3xl font-black tracking-tight mb-2 ${
+              isDarkMode ? "text-[#E2E8F0]" : "text-gray-900"
+            }`}
           >
             Meet the team
           </h2>
           <p
             className={`text-sm max-w-md leading-relaxed ${
-              isDarkMode ? "text-gray-400" : "text-gray-500"
+              isDarkMode ? "text-gray-500" : "text-gray-400"
             }`}
           >
-            The people who built RexAuction — from system architecture to
-            pixel-perfect UI.
+            The people who built RexAuction — from system architecture to interface.
           </p>
         </div>
 
-        {/* Grid */}
-        <div
-          className={`rounded-xl border overflow-hidden ${borderColor}`}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(1, 1fr)",
-          }}
-        >
+        <div className={`rounded-2xl border overflow-hidden ${borderColor} ${surface}`}>
           {/* Leadership section */}
           <SectionLabel label="Leadership" isDarkMode={isDarkMode} />
 
