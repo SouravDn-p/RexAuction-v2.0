@@ -9,7 +9,7 @@ import {
 import { IoChatbubbleEllipsesOutline, IoWalletOutline, IoSettingsOutline } from "react-icons/io5";
 import { TfiAnnouncement } from "react-icons/tfi";
 import { RiAuctionLine } from "react-icons/ri";
-import { Trophy } from "lucide-react";
+import { CreditCard, Trophy } from "lucide-react";
 
 interface BuyerNavigationsProps {
   colors: {
@@ -50,7 +50,7 @@ const BuyerNavigations = ({
 
   // Shared NavLink class builder
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 py-2 px-2.5 rounded-lg text-sm transition-all duration-150 mb-0.5
+    `flex items-center gap-3 py-2 px-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150 mb-0.5
     ${isActive ? navActive : `${textClass} ${navHover}`}
     ${collapsed ? "justify-center" : ""}`;
 
@@ -60,7 +60,7 @@ const BuyerNavigations = ({
       onClick={() => toggleDropdown(key)}
       title={collapsed ? label : undefined}
       className={`
-        flex items-center w-full py-2 px-2.5 rounded-lg text-sm transition-all duration-150 mb-0.5
+        flex items-center w-full py-2 px-2.5 rounded-lg text-sm cursor-pointer transition-all duration-150 mb-0.5
         ${textClass} ${navHover}
         ${collapsed ? "justify-center" : "justify-between"}
       `}
@@ -98,9 +98,9 @@ const BuyerNavigations = ({
               <FaBlog size={14} className={iconClass} />
               <span>Blog</span>
             </NavLink>
-            <NavLink to="/buyer/wallet" className={navClass}>
-              <IoWalletOutline size={16} className={iconClass} />
-              <span>Wallet</span>
+            <NavLink to="/buyer/payments" className={navClass}>
+              <CreditCard size={16} className={iconClass} />
+              <span>Payments</span>
             </NavLink>
           </div>
         )}
@@ -113,8 +113,8 @@ const BuyerNavigations = ({
             <NavLink to="/buyer/blog" className={navClass} title="Blog">
               <FaBlog size={14} className={iconClass} />
             </NavLink>
-            <NavLink to="/buyer/wallet" className={navClass} title="Wallet">
-              <IoWalletOutline size={16} className={iconClass} />
+            <NavLink to="/buyer/payments" className={navClass} title="Payments">
+              <CreditCard size={16} className={iconClass} />
             </NavLink>
           </div>
         )}
@@ -151,10 +151,6 @@ const BuyerNavigations = ({
               <Trophy size={16} className={iconClass} />
               <span>Won Auctions</span>
             </NavLink>
-            <NavLink to="/buyer/bidHistory" className={navClass}>
-              <MdHistory size={16} className={iconClass} />
-              <span>Bid History</span>
-            </NavLink>
           </div>
         )}
         {collapsed && (
@@ -162,8 +158,8 @@ const BuyerNavigations = ({
             <NavLink to="/buyer/status" className={navClass} title="Auction Status">
               <RiAuctionLine size={16} className={iconClass} />
             </NavLink>
-            <NavLink to="/buyer/bidHistory" className={navClass} title="Bid History">
-              <MdHistory size={16} className={iconClass} />
+            <NavLink to="/buyer/won-auctions" className={navClass} title="Won Auctions">
+              <Trophy size={16} className={iconClass} />
             </NavLink>
           </div>
         )}

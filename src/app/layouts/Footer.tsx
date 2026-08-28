@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Link } from "react-router-dom";
 import { useAppSelector } from "../redux/hooks";
 
 import Particles from "@tsparticles/react";
@@ -227,16 +228,15 @@ const Footer = () => {
           <p>&copy; {currentYear} Techno Rexers. All rights reserved.</p>
           
           <div className="mt-4 md:mt-0 flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item, idx) => (
-              <React.Fragment key={idx}>
-                <a
-                  href={`/${item.toLowerCase().replace(/ /g, "-")}`}
-                  className="hover:text-white transition-colors"
-                >
-                  {item}
-                </a>
-              </React.Fragment>
-            ))}
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms-of-service" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+            <Link to="/cookie-policy" className="hover:text-white transition-colors">
+              Cookie Policy
+            </Link>
           </div>
         </div>
       </div>

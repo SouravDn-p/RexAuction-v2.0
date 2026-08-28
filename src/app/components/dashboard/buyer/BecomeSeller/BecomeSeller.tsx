@@ -1,8 +1,6 @@
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import {
-  UserCheck,
   Upload,
   CheckCircle2,
   Clock,
@@ -18,7 +16,11 @@ import {
   RotateCcw,
   FileText,
   Phone,
+  BadgeCheck,
+  Percent,
+  Timer,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTheme } from "../../../../../hooks/useTheme";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -151,28 +153,73 @@ export default function BecomeSeller() {
       <Toaster position="top-right" toastOptions={{ style: { fontFamily: "'DM Sans', sans-serif", fontSize: "13px", borderRadius: "10px", background: isDarkMode ? "#1e293b" : "#fff", color: isDarkMode ? "#f1f5f9" : "#0f172a", border: isDarkMode ? "1px solid #334155" : "1px solid #e2e8f0" } }} />
 
       {/* Header */}
-      <div className={`sticky top-0 z-20 border-b backdrop-blur-xl ${isDarkMode ? "bg-slate-900/80 border-slate-700" : "bg-white/80 border-slate-200"}`}>
+      <div className={`sticky top-0 z-20 border-b backdrop-blur-xl ${isDarkMode ? "bg-slate-900/80 border-slate-700/50" : "bg-white/80 border-slate-100"}`}>
         <div className="px-4 sm:px-6 lg:px-8 py-5">
-          <h1 className="text-xl font-bold tracking-tight flex items-center gap-2"><UserCheck className="w-5 h-5 text-violet-500" /> Become a Seller</h1>
-          <p className={`text-xs mt-0.5 ${muted}`}>Apply to sell on Rex Auction and set up your storefront</p>
-        </div>
-        <div className="px-4 sm:px-6 lg:px-8 pb-3 flex gap-1">
-          <button onClick={() => setTab("application")} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === "application" ? "bg-violet-600 text-white" : isDarkMode ? "text-slate-400 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-100"}`}>Application</button>
-          <button
-            onClick={() => status === "approved" ? setTab("profile") : toast.error("Available after your seller application is approved")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${tab === "profile" ? "bg-violet-600 text-white" : isDarkMode ? "text-slate-400 hover:bg-slate-800" : "text-slate-600 hover:bg-slate-100"} ${status !== "approved" ? "opacity-60" : ""}`}
-          >
-            {status !== "approved" && <Lock className="w-3.5 h-3.5" />} Seller Profile
-          </button>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-3 flex-1">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isDarkMode ? "bg-violet-500/10" : "bg-violet-50"}`}>
+                <Store className="w-4 h-4 text-violet-500" />
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold">Become a Seller</h1>
+                <p className={`text-xs ${muted}`}>Apply once — list auctions after approval</p>
+              </div>
+            </div>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setTab("application")}
+                className={`px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${tab === "application" ? "bg-violet-600 text-white" : isDarkMode ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"}`}
+              >
+                Application
+              </button>
+              <button
+                onClick={() => status === "approved" ? setTab("profile") : toast.error("Available after your seller application is approved")}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${tab === "profile" ? "bg-violet-600 text-white" : isDarkMode ? "text-slate-400 hover:bg-slate-800" : "text-slate-500 hover:bg-slate-100"} ${status !== "approved" ? "opacity-60" : ""}`}
+              >
+                {status !== "approved" && <Lock className="w-3.5 h-3.5" />} Storefront
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-2xl mx-auto">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 max-w-3xl mx-auto">
 
         {/* ── Application tab ─────────────────────────────────────────── */}
         {tab === "application" && (
           <>
             {status === "none" && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                  {[
+                    { label: "Seller commission", value: "5%", sub: "On successful sales", icon: <Percent className="w-4 h-4" />, color: "text-violet-400", bg: isDarkMode ? "bg-violet-500/10" : "bg-violet-50" },
+                    { label: "Review time", value: "2–3 days", sub: "Typical decision window", icon: <Timer className="w-4 h-4" />, color: "text-amber-400", bg: isDarkMode ? "bg-amber-500/10" : "bg-amber-50" },
+                    { label: "Identity check", value: "Required", sub: "NID + phone verification", icon: <BadgeCheck className="w-4 h-4" />, color: "text-emerald-400", bg: isDarkMode ? "bg-emerald-500/10" : "bg-emerald-50" },
+                  ].map((s) => (
+                    <div key={s.label} className={`rounded-2xl border p-4 ${surface}`}>
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center mb-3 ${s.bg} ${s.color}`}>{s.icon}</div>
+                      <p className={`text-xs font-medium mb-0.5 ${muted}`}>{s.label}</p>
+                      <p className={`text-lg font-bold ${strong}`}>{s.value}</p>
+                      <p className={`text-[11px] mt-0.5 ${muted}`}>{s.sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className={`rounded-2xl border p-5 mb-6 ${surface}`}>
+                  <p className={`text-sm font-semibold mb-1 ${strong}`}>How selling works</p>
+                  <p className={`text-xs leading-relaxed mb-4 ${muted}`}>
+                    Complete identity verification, tell us what you plan to list, then wait for a short review. Once approved you can set up a storefront and create auctions. Listings stay live until they receive bids; withdrawing after bids land may be restricted.
+                  </p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    {["Verify ID", "Get approved", "List & sell"].map((label, i) => (
+                      <div key={label} className={`rounded-xl px-2 py-3 ${panel}`}>
+                        <p className="text-xs font-bold text-violet-500 mb-0.5">0{i + 1}</p>
+                        <p className={`text-[11px] font-medium ${strong}`}>{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               <div className={`rounded-2xl border p-6 sm:p-8 ${surface}`}>
                 {/* Stepper */}
                 <div className="flex items-center mb-8">
@@ -282,7 +329,21 @@ export default function BecomeSeller() {
                     </div>
                     <label className="flex items-start gap-2.5 cursor-pointer">
                       <input type="checkbox" checked={agreedTerms} onChange={e => setAgreedTerms(e.target.checked)} className="mt-0.5" />
-                      <span className={`text-xs ${muted}`}>I agree to Rex Auction's seller terms, commission structure, and confirm the information above is accurate.</span>
+                      <span className={`text-xs ${muted}`}>
+                        I agree to Rex Auction&apos;s{" "}
+                        <Link to="/terms" className="text-purple-400 hover:underline">
+                          seller terms
+                        </Link>
+                        ,{" "}
+                        <Link to="/terms-of-service" className="text-purple-400 hover:underline">
+                          Terms of Service
+                        </Link>
+                        , and{" "}
+                        <Link to="/privacy-policy" className="text-purple-400 hover:underline">
+                          Privacy Policy
+                        </Link>
+                        , and confirm the information above is accurate.
+                      </span>
                     </label>
                   </div>
                 )}
@@ -306,6 +367,7 @@ export default function BecomeSeller() {
                   )}
                 </div>
               </div>
+              </>
             )}
 
             {status !== "none" && (
