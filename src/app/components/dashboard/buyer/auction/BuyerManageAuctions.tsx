@@ -26,7 +26,7 @@ import {
 import { useMemo, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { MOCK_BUYER_AUCTIONS, type AuctionStatus, type BuyerAuction } from "../../../../../data/Buyerauctiondata";
+import { liveAuctionPath, MOCK_BUYER_AUCTIONS, type AuctionStatus, type BuyerAuction } from "../../../../../data/Buyerauctiondata";
 import { MOCK_USER } from "../../../../../data/MOCK_USER";
 import { useTheme } from "../../../../../hooks/useTheme";
 import ToggleSwitch from "../../../ui/ToggleSwitch";
@@ -297,23 +297,34 @@ function SellerReviewsModal({ auction, onClose, isDarkMode }: { auction: BuyerAu
 }
 
 // ─── Auction Card ─────────────────────────────────────────────────────────────
-function AuctionCard({ auction, isDarkMode, watched, onViewHistory, onWatch, onReport, onBid, onSellerReviews }: {
+function AuctionCard({ auction, isDarkMode, watched, onViewHistory, onWatch, onReport, onSellerReviews }: {
   auction: BuyerAuction; isDarkMode: boolean; watched: boolean;
-  onViewHistory: (a: BuyerAuction) => void; onWatch: (a: BuyerAuction) => void; onReport: (a: BuyerAuction) => void; onBid: (a: BuyerAuction) => void; onSellerReviews: (a: BuyerAuction) => void;
+  onViewHistory: (a: BuyerAuction) => void; onWatch: (a: BuyerAuction) => void; onReport: (a: BuyerAuction) => void; onSellerReviews: (a: BuyerAuction) => void;
 }) {
   const statusCfg = STATUS_CONFIG[auction.status];
   const leading = isLeading(auction);
   const endingSoon = auction.status === "ongoing" && isEndingSoon(auction.endTime);
   const cardBg = isDarkMode ? "bg-slate-800 border-slate-700 hover:border-slate-600" : "bg-white border-slate-100 hover:border-slate-300";
+  const liveHref = liveAuctionPath(auction);
+  const primaryHref =
+    auction.status === "ongoing" ? liveHref :
+    auction.status === "won" ? `/${MOCK_USER.role}/won-auctions/${auction._id}` :
+    undefined;
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }} whileHover={{ y: -3 }} transition={{ type: "spring", stiffness: 300, damping: 28 }} className={`group rounded-2xl border transition-all duration-200 overflow-hidden shadow-sm ${cardBg}`}>
       {/* Image */}
       <div className="relative h-44 overflow-hidden">
-        <img src={auction.image} alt={auction.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        {primaryHref ? (
+          <Link to={primaryHref} className="block h-full">
+            <img src={auction.image} alt={auction.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          </Link>
+        ) : (
+          <img src={auction.image} alt={auction.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
 
-        <div className="absolute top-3 left-3">
+        <div className="absolute top-3 left-3 pointer-events-none">
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border backdrop-blur-sm ${statusCfg.color}`}>{statusCfg.icon}{statusCfg.label}</span>
         </div>
 
@@ -325,7 +336,7 @@ function AuctionCard({ auction, isDarkMode, watched, onViewHistory, onWatch, onR
 
         {/* Leading / outbid */}
         {auction.status === "ongoing" && (
-          <div className="absolute bottom-3 left-3">
+          <div className="absolute bottom-3 left-3 pointer-events-none">
             {leading ? (
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/90 text-white backdrop-blur-sm"><TrendingUp className="w-3 h-3" /> Leading</span>
             ) : (
@@ -334,17 +345,23 @@ function AuctionCard({ auction, isDarkMode, watched, onViewHistory, onWatch, onR
           </div>
         )}
         {auction.status === "won" && (
-          <div className="absolute bottom-3 left-3"><span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold bg-amber-500/90 text-white backdrop-blur-sm"><Trophy className="w-3 h-3" /> Winner</span></div>
+          <div className="absolute bottom-3 left-3 pointer-events-none"><span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-semibold bg-amber-500/90 text-white backdrop-blur-sm"><Trophy className="w-3 h-3" /> Winner</span></div>
         )}
         {auction.status === "ongoing" && (
-          <div className={`absolute bottom-3 right-3 text-xs font-bold px-2.5 py-1 rounded-lg ${endingSoon ? "bg-rose-500 text-white animate-pulse" : "bg-black/50 text-white backdrop-blur-sm"}`}>{formatCountdown(auction.endTime)}</div>
+          <div className={`pointer-events-none absolute bottom-3 right-3 text-xs font-bold px-2.5 py-1 rounded-lg ${endingSoon ? "bg-rose-500 text-white animate-pulse" : "bg-black/50 text-white backdrop-blur-sm"}`}>{formatCountdown(auction.endTime)}</div>
         )}
       </div>
 
       {/* Body */}
       <div className="p-4">
         <div className="min-w-0 mb-3">
-          <h3 className="font-bold text-sm leading-tight line-clamp-2">{auction.name}</h3>
+          {primaryHref ? (
+            <Link to={primaryHref}>
+              <h3 className="font-bold text-sm leading-tight line-clamp-2 hover:text-violet-500">{auction.name}</h3>
+            </Link>
+          ) : (
+            <h3 className="font-bold text-sm leading-tight line-clamp-2">{auction.name}</h3>
+          )}
           <div className="flex items-center gap-1.5 mt-1">
             <Tag className={`w-3 h-3 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`} />
             <span className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>{auction.category}</span>
@@ -389,7 +406,7 @@ function AuctionCard({ auction, isDarkMode, watched, onViewHistory, onWatch, onR
             <Link to={`/${MOCK_USER.role}/won-auctions/${auction._id}`} className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-black text-center transition-colors flex items-center justify-center gap-1">Manage <ChevronRight className="w-3 h-3" /></Link>
           )}
           {auction.status === "ongoing" && (
-            <button onClick={() => onBid(auction)} className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-white text-center transition-colors flex items-center justify-center gap-1 ${leading ? "bg-violet-600 hover:bg-violet-700" : "bg-sky-500 hover:bg-sky-600"}`}>{leading ? "Bid / Buy" : "Bid Again"} <Gavel className="w-3 h-3" /></button>
+            <Link to={liveHref} className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-white text-center transition-colors flex items-center justify-center gap-1 ${leading ? "bg-violet-600 hover:bg-violet-700" : "bg-sky-500 hover:bg-sky-600"}`}>{leading ? "Live bid" : "Bid again"} <Gavel className="w-3 h-3" /></Link>
           )}
           {auction.status === "lost" && (
             <Link to="/auction" className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-600 hover:bg-slate-500 text-white text-center transition-colors">Find Similar</Link>
@@ -406,11 +423,9 @@ export default function BuyerManageAuctions() {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [search, setSearch] = useState("");
   const [historyTarget, setHistoryTarget] = useState<BuyerAuction | null>(null);
-  const [bidTarget, setBidTarget] = useState<BuyerAuction | null>(null);
   const [reportTarget, setReportTarget] = useState<BuyerAuction | null>(null);
   const [reviewsTarget, setReviewsTarget] = useState<BuyerAuction | null>(null);
   const [watchlist, setWatchlist] = useState<Set<string>>(() => new Set(["a1", "a3"]));
-  const [priceAlerts, setPriceAlerts] = useState<Set<string>>(() => new Set(["a1"]));
 
   const auctions = MOCK_BUYER_AUCTIONS;
 
@@ -442,7 +457,6 @@ export default function BuyerManageAuctions() {
       return next;
     });
   };
-  const toggleAlert = (id: string) => setPriceAlerts((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   return (
     <div className={`min-h-screen transition-colors ${isDarkMode ? "bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-900"}`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -503,7 +517,7 @@ export default function BuyerManageAuctions() {
           <AnimatePresence mode="popLayout">
             <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filtered.map((a) => (
-                <AuctionCard key={a._id} auction={a} isDarkMode={isDarkMode} watched={watchlist.has(a._id)} onViewHistory={setHistoryTarget} onWatch={toggleWatch} onReport={setReportTarget} onBid={setBidTarget} onSellerReviews={setReviewsTarget} />
+                <AuctionCard key={a._id} auction={a} isDarkMode={isDarkMode} watched={watchlist.has(a._id)} onViewHistory={setHistoryTarget} onWatch={toggleWatch} onReport={setReportTarget} onSellerReviews={setReviewsTarget} />
               ))}
             </div>
           </AnimatePresence>
@@ -513,7 +527,6 @@ export default function BuyerManageAuctions() {
       {/* Modals */}
       <AnimatePresence>
         {historyTarget && <BidHistoryModal auction={historyTarget} onClose={() => setHistoryTarget(null)} isDarkMode={isDarkMode} />}
-        {bidTarget && <BidModal auction={bidTarget} onClose={() => setBidTarget(null)} isDarkMode={isDarkMode} watched={watchlist.has(bidTarget._id)} alertOn={priceAlerts.has(bidTarget._id)} onToggleAlert={() => toggleAlert(bidTarget._id)} />}
         {reportTarget && <ReportModal auction={reportTarget} onClose={() => setReportTarget(null)} isDarkMode={isDarkMode} />}
         {reviewsTarget && <SellerReviewsModal auction={reviewsTarget} onClose={() => setReviewsTarget(null)} isDarkMode={isDarkMode} />}
       </AnimatePresence>

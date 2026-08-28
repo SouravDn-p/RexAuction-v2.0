@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   CreditCard,
   Download,
+  Eye,
   MapPin,
   Package,
   Plus,
@@ -16,8 +17,9 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
-import { MOCK_PAYMENTS } from "../../../../../data/MOCK_PAYMENTS";
+import { MOCK_BUYER_AUCTIONS } from "../../../../../data/Buyerauctiondata";
 import { MOCK_USER } from "../../../../../data/MOCK_USER";
 import { exportTransactionPdf } from "../../../../lib/exportTransactionPdf";
 import Counter from "../../../../../hooks/Counter";
@@ -39,14 +41,16 @@ interface Tx {
   type: "Deposit" | "Withdrawal";
   amount: number;
   status: "completed" | "pending";
+  auctionId?: string;
 }
 
 const SEED_TX: Tx[] = [
   { id: "t1", date: "2026-07-06", description: "Wallet top-up via SSLCommerz", type: "Deposit", amount: 5000, status: "completed" },
-  { id: "t2", date: "2026-07-04", description: "Payment — Gibson Les Paul '59", type: "Withdrawal", amount: 18900, status: "completed" },
+  { id: "t2", date: "2026-07-04", description: "Payment — Gibson Les Paul '59", type: "Withdrawal", amount: 18900, status: "completed", auctionId: "a4" },
   { id: "t3", date: "2026-07-02", description: "Wallet top-up via bKash", type: "Deposit", amount: 20000, status: "completed" },
-  { id: "t4", date: "2026-06-28", description: "Payment — Mac Pro M2 Ultra", type: "Withdrawal", amount: 6090, status: "pending" },
+  { id: "t4", date: "2026-06-28", description: "Payment — Mac Pro M2 Ultra", type: "Withdrawal", amount: 6090, status: "pending", auctionId: "a5" },
   { id: "t5", date: "2026-06-20", description: "Refund — cancelled order", type: "Deposit", amount: 1200, status: "completed" },
+  { id: "t6", date: "2026-05-20", description: "Payment — Harry Potter first edition", type: "Withdrawal", amount: 9975, status: "completed", auctionId: "a6" },
 ];
 
 interface Card {
@@ -82,15 +86,20 @@ interface Order {
   payment: "completed" | "pending";
   delivery: "pending" | "in transit" | "delivered" | "cancelled";
 }
-const SEED_ORDERS: Order[] = MOCK_PAYMENTS.map((p) => ({
-  id: p._id,
-  item: p.item,
-  image: p.image,
-  seller: p.seller,
-  amount: p.amount,
-  date: p.date,
-  payment: p.status as "completed" | "pending",
-  delivery: p.deliveryStatus as Order["delivery"],
+const deliveryFromWon = (d: string | undefined): Order["delivery"] => {
+  if (d === "delivered") return "delivered";
+  if (d === "in_transit" || d === "shipped") return "in transit";
+  return "pending";
+};
+const SEED_ORDERS: Order[] = MOCK_BUYER_AUCTIONS.filter((a) => a.status === "won").map((a) => ({
+  id: a._id,
+  item: a.name,
+  image: a.image,
+  seller: a.seller,
+  amount: a.totalPaid ?? a.myBid,
+  date: a.endTime,
+  payment: a.paymentStatus === "paid" ? "completed" : "pending",
+  delivery: deliveryFromWon(a.deliveryStatus),
 }));
 
 export default function BuyerWalletPage() {
@@ -224,8 +233,8 @@ export default function BuyerWalletPage() {
               <Wallet className="w-4 h-4 text-violet-500" />
             </div>
             <div>
-              <h1 className={`text-sm font-semibold ${strong}`}>Wallet</h1>
-              <p className={`text-xs ${muted}`}>Balance, transactions, orders & payment methods</p>
+              <h1 className={`text-sm font-semibold ${strong}`}>Payments</h1>
+              <p className={`text-xs ${muted}`}>Balance, methods, auction payments and orders</p>
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -363,7 +372,8 @@ export default function BuyerWalletPage() {
                     <th className={`py-4 px-6 text-left text-xs font-medium uppercase tracking-widest ${muted}`}>Date</th>
                     <th className={`py-4 px-6 text-left text-xs font-medium uppercase tracking-widest ${muted}`}>Description</th>
                     <th className={`py-4 px-6 text-left text-xs font-medium uppercase tracking-widest ${muted}`}>Amount</th>
-                    <th className={`py-4 px-6 text-right text-xs font-medium uppercase tracking-widest ${muted}`}>Status</th>
+                    <th className={`py-4 px-6 text-left text-xs font-medium uppercase tracking-widest ${muted}`}>Status</th>
+                    <th className={`py-4 px-6 text-right text-xs font-medium uppercase tracking-widest ${muted}`}>Action</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isDarkMode ? "divide-slate-700/60" : "divide-slate-100"}`}>
@@ -376,14 +386,33 @@ export default function BuyerWalletPage() {
                           {t.type === "Deposit" ? <ArrowDown className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}{fmt(t.amount)}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-right">
+                      <td className="py-4 px-6">
                         <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${t.status === "completed" ? (isDarkMode ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-100 text-emerald-700") : (isDarkMode ? "bg-amber-500/10 text-amber-400" : "bg-amber-100 text-amber-700")}`}>
                           {t.status === "completed" ? "Completed" : "Pending"}
                         </span>
                       </td>
+                      <td className="py-4 px-6 text-right">
+                        {t.auctionId && t.status === "completed" ? (
+                          <Link
+                            to={`/buyer/won-auctions/${t.auctionId}`}
+                            className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium ${isDarkMode ? "bg-slate-700 hover:bg-slate-600" : "bg-slate-100 hover:bg-slate-200"}`}
+                          >
+                            <Eye className="w-3.5 h-3.5" /> View
+                          </Link>
+                        ) : t.auctionId ? (
+                          <Link
+                            to={`/buyer/won-auctions/${t.auctionId}`}
+                            className={`inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium ${isDarkMode ? "bg-slate-700 hover:bg-slate-600" : "bg-slate-100 hover:bg-slate-200"}`}
+                          >
+                            Pay
+                          </Link>
+                        ) : (
+                          <span className={`text-xs ${muted}`}>—</span>
+                        )}
+                      </td>
                     </motion.tr>
                   )) : (
-                    <tr><td colSpan={4} className={`py-16 text-center ${muted}`}>No transactions found</td></tr>
+                    <tr><td colSpan={5} className={`py-16 text-center ${muted}`}>No transactions found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -404,7 +433,21 @@ export default function BuyerWalletPage() {
                   <span className={`hidden sm:inline-flex items-center gap-1 text-[11px] font-medium capitalize px-2.5 py-1 rounded-lg ${deliveryBadge(o.delivery)}`}>
                     <Truck className="w-3 h-3" /> {o.delivery}
                   </span>
-                  <button onClick={() => setOrderModal(o)} className={`text-xs px-3 py-1.5 rounded-lg font-medium ${isDarkMode ? "bg-slate-700 hover:bg-slate-600" : "bg-slate-100 hover:bg-slate-200"}`}>View</button>
+                  {o.payment === "completed" ? (
+                    <Link
+                      to={`/buyer/won-auctions/${o.id}`}
+                      className={`text-xs px-3 py-1.5 rounded-lg font-medium ${isDarkMode ? "bg-slate-700 hover:bg-slate-600" : "bg-slate-100 hover:bg-slate-200"}`}
+                    >
+                      View
+                    </Link>
+                  ) : (
+                    <Link
+                      to={`/buyer/won-auctions/${o.id}`}
+                      className="text-xs px-3 py-1.5 rounded-lg font-medium bg-amber-500 hover:bg-amber-600 text-black"
+                    >
+                      Pay
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>

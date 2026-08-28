@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import { ImHammer2 } from "react-icons/im";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -18,13 +18,19 @@ interface SidebarProps {
 const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
-  // Collapsed only applies on desktop (lg+)
+  const dashRole =
+    pathname.startsWith("/admin") ? "admin" :
+    pathname.startsWith("/seller") ? "seller" :
+    pathname.startsWith("/buyer") ? "buyer" :
+    MOCK_USER.role;
+
+  const isAdmin = dashRole === "admin";
+  const isSeller = dashRole === "seller";
+  const isBuyer = dashRole === "buyer";
+
   const [collapsed, setCollapsed] = useState(false);
-
-  const isAdmin = MOCK_USER.role === "admin";
-  const isSeller = MOCK_USER.role === "seller";
-  const isBuyer = MOCK_USER.role === "buyer";
 
   const [openDropdown, setOpenDropdown] = useState<Record<string, boolean>>({
     dashboard: false,
@@ -120,7 +126,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
 },
   };
 
-  const t = roleTheme[MOCK_USER.role];
+  const t = roleTheme[dashRole];
 
   const colors = {
     text: t.text.replace("text-", ""),
@@ -253,7 +259,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
                 {MOCK_USER.name}
               </p>
               <span className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-md capitalize mt-0.5 ${t.badge}`}>
-                {MOCK_USER.role}
+                {dashRole}
               </span>
             </div>
           )}
@@ -393,7 +399,7 @@ const Sidebar = ({ mobileOpen, onMobileClose }: SidebarProps) => {
               </div>
               <div className="min-w-0 flex-1">
                 <p className={`text-sm font-semibold truncate ${isDarkMode ? "text-white" : "text-gray-800"}`}>{MOCK_USER.name}</p>
-                <span className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-md capitalize mt-0.5 ${t.badge}`}>{MOCK_USER.role}</span>
+                <span className={`inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-md capitalize mt-0.5 ${t.badge}`}>{dashRole}</span>
               </div>
             </div>
           </div>

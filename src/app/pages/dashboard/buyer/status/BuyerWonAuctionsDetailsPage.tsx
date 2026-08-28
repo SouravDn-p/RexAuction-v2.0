@@ -14,9 +14,9 @@ export default function BuyerWonAuctionsDetailsPage() {
 
   if (!auction) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-gray-900 text-gray-100" : "bg-slate-50"}`}>
+      <div className={`min-h-screen flex items-center justify-center ${isDarkMode ? "bg-slate-900 text-slate-100" : "bg-slate-50 text-slate-900"}`}>
         <div className="text-center">
-          <Trophy className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+          <Trophy className="w-12 h-12 text-slate-400 mx-auto mb-3" />
           <p className="font-semibold">Auction not found</p>
           <Link to={`/${MOCK_USER.role}/won-auctions`} className="text-violet-500 text-sm mt-2 inline-block hover:underline">
             Back to Won Auctions

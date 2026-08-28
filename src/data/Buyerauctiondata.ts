@@ -34,6 +34,8 @@ export interface BuyerAuction {
   estimatedDelivery?: string;
   invoiceId?: string;
   totalPaid?: number;
+  /** Catalog id used by `/liveAuction/:id` when it differs from `_id`. */
+  liveAuctionId?: string;
 }
 
 // ─── Mock Data ─────────────────────────────────────────────────────────────────
@@ -68,6 +70,7 @@ export const MOCK_BUYER_AUCTIONS: BuyerAuction[] = [
     sellerRating: 4.9,
     description: "Fully restored 1967 Mustang Fastback in Highland Green. Numbers matching 390 big block.",
     condition: "Restored",
+    liveAuctionId: "2",
   },
   {
     _id: "a2",
@@ -248,3 +251,6 @@ export const MOCK_BUYER_AUCTIONS: BuyerAuction[] = [
     condition: "Good",
   },
 ];
+
+export const liveAuctionPath = (auction: BuyerAuction) =>
+  `/liveAuction/${auction.liveAuctionId ?? auction._id}`;

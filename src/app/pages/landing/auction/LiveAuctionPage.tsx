@@ -1,13 +1,16 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { AiFillCrown } from "react-icons/ai";
+import { useParams } from "react-router-dom";
+import { MOCK_BUYER_AUCTIONS, type BuyerAuction } from "../../../../data/Buyerauctiondata";
+import { MOCK_AUCTIONS } from "../../../../data/MOCK_AUCTIONS";
 import { MOCK_USER } from "../../../../data/MOCK_USER";
 import { useTheme } from "../../../../hooks/useTheme";
+import type { AuctionItem } from "../../../../types/shared/auctionTypes";
 import LiveAuctionDetails from "../../../components/landing/liveAuction/LiveAuctionDetails";
-// ─── Mock Data ────────────────────────────────────────────────────────────────
 
-export const MOCK_AUCTION = {
+const FALLBACK_AUCTION: AuctionItem = {
     _id: "1",
     name: "1967 Shelby GT500 Eleanor — Iconic Muscle Car",
     category: "Vehicles",
@@ -30,6 +33,35 @@ export const MOCK_AUCTION = {
     sellerDisplayName: "Heritage Motors",
     sellerEmail: "heritage@motors.com",
     sellerPhotoUrl: "https://ui-avatars.com/api/?name=Heritage+Motors&background=5b21b6&color=fff",
+};
+
+const buyerToLive = (a: BuyerAuction): AuctionItem => ({
+  _id: a._id,
+  name: a.name,
+  category: a.category,
+  description: a.description,
+  startingPrice: a.startingPrice,
+  currentBid: a.currentBid,
+  status: a.status === "ongoing" ? "Active" : "Ended",
+  startTime: a.startTime,
+  endTime: a.endTime,
+  images: [a.image, a.image, a.image, a.image],
+  condition: a.condition,
+  itemYear: 0,
+  history: a.description,
+  reference: a.invoiceId ?? a._id.toUpperCase(),
+  sellerDisplayName: a.seller,
+  sellerEmail: `${a.seller.replace(/\s/g, "").toLowerCase()}@rex-auction.com`,
+  sellerPhotoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(a.seller)}&background=7c3aed&color=fff`,
+});
+
+const resolveLiveAuction = (id: string | undefined): AuctionItem => {
+  if (!id) return FALLBACK_AUCTION;
+  const catalog = MOCK_AUCTIONS.find((a) => a._id === id);
+  if (catalog) return catalog;
+  const buyer = MOCK_BUYER_AUCTIONS.find((a) => a._id === id || a.liveAuctionId === id);
+  if (buyer) return buyerToLive(buyer);
+  return FALLBACK_AUCTION;
 };
 
 const INITIAL_TOP_BIDDERS = [
@@ -73,26 +105,38 @@ const crownColor = (i: number) =>
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LiveAuctionPage() {
+  const { id } = useParams<{ id: string }>();
   const { isDarkMode } = useTheme();
+  const auction = useMemo(() => resolveLiveAuction(id), [id]);
+
   const [countdown,        setCountdown]        = useState(0);
   const [bidAmount,        setBidAmount]        = useState("");
   const [autoBidAmount,    setAutoBidAmount]    = useState("");
   const [incrementalAmt,   setIncrementalAmt]   = useState("");
   const [bidAnimation,     setBidAnimation]     = useState(false);
   
-  const [myBid,            setMyBid]            = useState<{ amount:number; autoBid:number } | null>({ amount: 1200, autoBid: 0 });
-  const [currentHighest,   setCurrentHighest]   = useState(MOCK_AUCTION.currentBid);
+  const [myBid,            setMyBid]            = useState<{ amount:number; autoBid:number } | null>(null);
+  const [currentHighest,   setCurrentHighest]   = useState(auction.currentBid ?? auction.startingPrice);
   const [topBidders,       setTopBidders]       = useState(INITIAL_TOP_BIDDERS);
   const [recentActivity,   setRecentActivity]   = useState<RecentActivity[]>(INITIAL_RECENT_ACTIVITY);
 
-  // Countdown timer
   useEffect(() => {
-    const endMs = new Date(MOCK_AUCTION.endTime).getTime();
+    setCurrentHighest(auction.currentBid ?? auction.startingPrice);
+    setMyBid(null);
+    setBidAmount("");
+    setAutoBidAmount("");
+    setIncrementalAmt("");
+    setTopBidders(INITIAL_TOP_BIDDERS);
+    setRecentActivity(INITIAL_RECENT_ACTIVITY);
+  }, [auction._id, auction.currentBid, auction.startingPrice]);
+
+  useEffect(() => {
+    const endMs = new Date(auction.endTime).getTime();
     const tick = () => setCountdown(Math.max(0, Math.floor((endMs - Date.now()) / 1000)));
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [auction.endTime]);
 
 
   // Design tokens
@@ -156,9 +200,9 @@ export default function LiveAuctionPage() {
             Live Auction
           </span>
           <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-            Live Bidding
+            {auction.name}
           </h1>
-          <p className="text-white/55 text-sm mt-1">Real-time auction — place your bid now</p>
+          <p className="text-white/55 text-sm mt-1">Live bidding — place your bid now</p>
         </div>
 
         {/* Live indicator */}
@@ -174,7 +218,7 @@ export default function LiveAuctionPage() {
 
           {/* ── Left column ───────────────────────────────────────────── */}
           <LiveAuctionDetails
-            auction={MOCK_AUCTION}
+            auction={auction}
             recentActivity={recentActivity}
             card={card}
             strong={strong}

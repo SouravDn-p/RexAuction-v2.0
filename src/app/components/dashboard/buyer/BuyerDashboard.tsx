@@ -223,8 +223,8 @@ export default function BuyerDashboard() {
 
   const quickActions = [
     { label: "Browse Auctions", icon: <Gavel />, bg: isDarkMode ? "bg-violet-500/10" : "bg-violet-50", color: "text-violet-500", path: "/auction" },
-    { label: "Add Funds", icon: <Wallet />, bg: isDarkMode ? "bg-emerald-500/10" : "bg-emerald-50", color: "text-emerald-500", path: "/buyer/wallet" },
-    { label: "Payment Methods", icon: <CreditCard />, bg: isDarkMode ? "bg-sky-500/10" : "bg-sky-50", color: "text-sky-500", path: "/buyer/wallet" },
+    { label: "Add Funds", icon: <Wallet />, bg: isDarkMode ? "bg-emerald-500/10" : "bg-emerald-50", color: "text-emerald-500", path: "/buyer/payments" },
+    { label: "Payment Methods", icon: <CreditCard />, bg: isDarkMode ? "bg-sky-500/10" : "bg-sky-50", color: "text-sky-500", path: "/buyer/payments" },
     { label: "Become Seller", icon: <Store />, bg: isDarkMode ? "bg-amber-500/10" : "bg-amber-50", color: "text-amber-500", path: "/buyer/becomeSeller" },
   ];
 
@@ -721,7 +721,7 @@ export default function BuyerDashboard() {
                 </div>
                 <span className={`text-sm font-semibold ${strong}`}>Payments & addresses</span>
               </div>
-              <button onClick={() => navigate("/buyer/wallet")} className="text-xs font-medium text-violet-500 hover:text-violet-600">
+              <button onClick={() => navigate("/buyer/payments")} className="text-xs font-medium text-violet-500 hover:text-violet-600">
                 Manage
               </button>
             </div>

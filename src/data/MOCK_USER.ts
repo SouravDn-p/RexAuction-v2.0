@@ -37,7 +37,7 @@ export const MOCK_USER: MockUser = {
   uid: "mock-user-001",
   email: "demo@rexauction.com",
   name: "Sourav Debnath",
-  role: "admin",
+  role: "buyer",
   photoURL: "https://res.cloudinary.com/dc6zbxbvm/image/upload/v1778042327/projects/lln9m2puev0eytzinxnd.jpg",
   status: "active",
   auctionsWon: 5,
